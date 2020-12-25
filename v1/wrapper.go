@@ -89,7 +89,8 @@ func ( xdo *Wrapper ) Attach( options ...int ) {
 	}
 	duration , _ := time.ParseDuration( strconv.Itoa( sleep_milliseconds ) + "ms")
 	for i := 0; i < number_of_tries; i++ {
-		cmd := fmt.Sprintf( "xdotool search --desktop 0 --name '%s'" , xdo.Window.Name )
+		//cmd := fmt.Sprintf( "xdotool search --desktop 0 --name '%s'" , xdo.Window.Name )
+		cmd := fmt.Sprintf( "xdotool search --name %s" , xdo.Window.Name )
 		info := exec_process( "/bin/bash" , "-c" , cmd )
 		lines := strings.Split( info , "\n" )
 		window_id , error := strconv.Atoi( lines[ 0 ] )
