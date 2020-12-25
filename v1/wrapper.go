@@ -9,9 +9,20 @@ import (
 	"strconv"
 )
 
+func get_display_number() ( result string ) {
+	command := exec.Command( "/bin/bash" , "-c" , "/usr/local/bin/getDisplayNumber"  )
+	out, err := command.Output()
+	if err != nil {
+		fmt.Sprintf( "%s\n" , err )
+	}
+	result = string( out[:] )
+	return
+}
+
 func exec_process( bash_command string , arguments ...string ) ( result string ) {
+	display_number := get_display_number()
 	command := exec.Command( bash_command , arguments... )
-	command.Env = append( os.Environ() , "DISPLAY=:0.0" )
+	command.Env = append( os.Environ() , fmt.Sprintf( "DISPLAY=%s" , display_number ) )
 	out, err := command.Output()
 	if err != nil {
 		fmt.Println( bash_command )
