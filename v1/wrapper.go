@@ -19,17 +19,22 @@ func get_display_number() ( result string ) {
 	return
 }
 
+var APPEND_DISPLAY bool = false
 func exec_process( bash_command string , arguments ...string ) ( result string ) {
-	display_number := get_display_number()
+	result = "failed"
 	command := exec.Command( bash_command , arguments... )
-	command.Env = append( os.Environ() , fmt.Sprintf( "DISPLAY=%s" , display_number ) )
-	out, err := command.Output()
+	if APPEND_DISPLAY == true {
+		display_number := get_display_number()
+		command.Env = append( os.Environ() , fmt.Sprintf( "DISPLAY=%s" , display_number ) )
+	}
+	out , err := command.Output()
 	if err != nil {
 		fmt.Println( bash_command )
 		fmt.Println( arguments )
-		fmt.Sprintf( "%s\n" , err )
+		fmt.Println( err )
+	} else {
+		result = string( out[:] )
 	}
-	result = string( out[:] )
 	return
 }
 
@@ -89,6 +94,38 @@ func ( xdo *Wrapper ) GetMonitors() {
 	}
 }
 
+func ( xdo *Wrapper ) AttachClass( options ...int ) {
+	number_of_tries := 20
+	sleep_milliseconds := 1000
+	if len( options ) > 0 {
+		number_of_tries = options[0]
+	}
+	if len( options ) > 1 {
+		sleep_milliseconds = options[1]
+	}
+	duration , _ := time.ParseDuration( strconv.Itoa( sleep_milliseconds ) + "ms" )
+	for i := 0; i < number_of_tries; i++ {
+		//cmd := fmt.Sprintf( "xdotool search --desktop 0 --name '%s'" , xdo.Window.Name )
+		// Spotify Changes the Title of the XWindow to be the "Now Playing" Track Information
+		// http://manpages.ubuntu.com/manpages/trusty/man1/xdotool.1.html#window%20stack
+		// http://manpages.ubuntu.com/manpages/trusty/man3/XQueryTree.3.html
+		cmd := fmt.Sprintf( "xdotool search --class '%s'" , xdo.Window.Name )
+		info := exec_process( "/bin/bash" , "-c" , cmd )
+		if info == "failed" {
+			APPEND_DISPLAY = !APPEND_DISPLAY
+			info = exec_process( "/bin/bash" , "-c" , cmd )
+		}
+		lines := strings.Split( info , "\n" )
+		window_id , error := strconv.Atoi( lines[ 1 ] )
+		if error != nil {
+			time.Sleep( duration )
+		} else {
+			xdo.Window.Id = window_id
+			return
+		}
+	}
+}
+
 func ( xdo *Wrapper ) Attach( options ...int ) {
 	number_of_tries := 20
 	sleep_milliseconds := 1000
@@ -101,8 +138,17 @@ func ( xdo *Wrapper ) Attach( options ...int ) {
 	duration , _ := time.ParseDuration( strconv.Itoa( sleep_milliseconds ) + "ms")
 	for i := 0; i < number_of_tries; i++ {
 		//cmd := fmt.Sprintf( "xdotool search --desktop 0 --name '%s'" , xdo.Window.Name )
-		cmd := fmt.Sprintf( "xdotool search --name %s" , xdo.Window.Name )
+
+		// Spotify Changes the Title of the XWindow to be the "Now Playing" Track Information
+		// http://manpages.ubuntu.com/manpages/trusty/man1/xdotool.1.html#window%20stack
+		// http://manpages.ubuntu.com/manpages/trusty/man3/XQueryTree.3.html
+
+		cmd := fmt.Sprintf( "xdotool search --name '%s'" , xdo.Window.Name )
 		info := exec_process( "/bin/bash" , "-c" , cmd )
+		if info == "failed" {
+			APPEND_DISPLAY = !APPEND_DISPLAY
+			info = exec_process( "/bin/bash" , "-c" , cmd )
+		}
 		lines := strings.Split( info , "\n" )
 		window_id , error := strconv.Atoi( lines[ 0 ] )
 		if error != nil {
