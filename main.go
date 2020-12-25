@@ -14,10 +14,16 @@ func main() {
 	// xdo.GetGeometry()
 	// fmt.Println( xdo )
 
+	// xdo := xdotool.Wrapper{}
+	// xdo.Window.Name = "spotify"
+	// xdo.GetMonitors()
+	// xdo.AttachClass( 3 , 500 )
+	// xdo.SetWindowSize( 1280 , 733 )
+	// xdo.MoveWindow( 300 , 212 )
+
 	xdo := xdotool.Wrapper{}
-	xdo.Window.Name = "spotify"
+	xdo.Window.Name = "thunar"
 	xdo.GetMonitors()
 	xdo.AttachClass( 3 , 500 )
-	xdo.SetWindowSize( 1280 , 733 )
-	xdo.MoveWindow( 300 , 212 )
+	xdo.Activate()
 }
