@@ -171,3 +171,13 @@ func ( xdo *Wrapper ) PressKey( key string ) {
 	xdo.Refocus()
 	exec_process( "/bin/bash" , "-c" , fmt.Sprintf( "xdotool key '%s'" , key )  )
 }
+
+func ( xdo *Wrapper ) SetWindowSize( x int , y int ) {
+	xdo.Refocus()
+	exec_process( "/bin/bash" , "-c" , fmt.Sprintf( "xdotool windowsize %s %d %d" , xdo.Window.Id , x , y ) )
+}
+
+func ( xdo *Wrapper ) MoveWindow( x int , y int ) {
+	xdo.Refocus()
+	exec_process( "/bin/bash" , "-c" , fmt.Sprintf( "xdotool windowmove %s %d %d" , xdo.Window.Id , x , y ) )
+}
